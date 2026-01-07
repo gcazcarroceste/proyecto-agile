@@ -58,12 +58,24 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDS_ID, usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                        
+                        // 1. Construir la imagen (Build)
                         bat """
                             @docker logout
                             @docker login -u %USER% -p %PASS%
                             docker build -t %DOCKERHUB_USER%/%IMAGE_NAME%:%APP_VERSION% .
                         """
+
+                        // 2. Escanear con Trivy (USANDO DOCKER)
+                        echo "--- EJECUTANDO TRIVY VÍA DOCKER ---"
+                        // NOTA IMPORTANTE:
+                        // -v /var/run/docker.sock:/var/run/docker.sock : Esto es OBLIGATORIO.
+                        // Le permite al contenedor de Trivy "ver" las imágenes que están en el Docker de tu Windows.
+                        bat """
+                            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --exit-code 1 --severity HIGH,CRITICAL %DOCKERHUB_USER%/%IMAGE_NAME%:%APP_VERSION%
+                        """
                         
+                        // 3. Subir la imagen (Push) - Solo si Trivy no falla
                         if (params.DO_PUSH) {
                             bat """
                                 docker push %DOCKERHUB_USER%/%IMAGE_NAME%:%APP_VERSION%
