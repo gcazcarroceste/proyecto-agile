@@ -1,7 +1,7 @@
 import unittest
-import operaciones
+import script
 
-class TestOperaciones(unittest.TestCase):
+class TestScript(unittest.TestCase):
 
     def test_suma(self):
         self.assertEqual(script.suma(3, 2), 5)
