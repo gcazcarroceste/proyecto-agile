@@ -9,7 +9,7 @@ pipeline {
 
     environment {
         DOCKERHUB_USER  = 'gcazcarro'
-        IMAGE_NAME      = 'suma'
+        IMAGE_NAME      = 'calculadora'
         DOCKER_CREDS_ID = 'dockerhub-creds'
     }
 
